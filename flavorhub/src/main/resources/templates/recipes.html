@@ -241,9 +241,131 @@
     </div>
     
     <script>
-        // TODO: Add JavaScript to fetch and display recipes from API
-        // TODO: Implement filtering functionality
-        // TODO: Add search functionality
+        // DOM Elements
+        const recipesGrid = document.getElementById('recipesGrid');
+        const difficultySelect = document.getElementById('difficulty');
+        const cuisineSelect = document.getElementById('cuisine');
+        const searchInput = document.getElementById('search');
+        
+        let allRecipes = [];
+        
+        /**
+         * Fetch all recipes from the API on page load
+         */
+        async function loadRecipes() {
+            try {
+                const response = await fetch('/api/recipes');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch recipes');
+                }
+                
+                allRecipes = await response.json();
+                displayRecipes(allRecipes);
+                
+            } catch (error) {
+                console.error('Error loading recipes:', error);
+                recipesGrid.innerHTML = '<div class="no-recipes"><h2>Error loading recipes</h2><p>Please refresh the page and try again.</p></div>';
+            }
+        }
+        
+        /**
+         * Display recipes in the grid based on current filters
+         * @param {Array} recipes - The recipes to display
+         */
+        function displayRecipes(recipes) {
+            if (recipes.length === 0) {
+                recipesGrid.innerHTML = '<div class="no-recipes"><h2>No Recipes Found</h2><p>Try adjusting your filters or check back later!</p></div>';
+                return;
+            }
+            
+            recipesGrid.innerHTML = '';
+            recipes.forEach(recipe => {
+                const card = createRecipeCard(recipe);
+                recipesGrid.appendChild(card);
+            });
+        }
+        
+        /**
+         * Create a recipe card element
+         * @param {Object} recipe - The recipe object
+         * @returns {HTMLElement} The recipe card element
+         */
+        function createRecipeCard(recipe) {
+            const card = document.createElement('div');
+            card.className = 'recipe-card';
+            
+            const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
+            const difficultyClass = (recipe.difficultyLevel || 'Medium').toLowerCase();
+            
+            card.innerHTML = `
+                <div class="recipe-header">
+                    <h3>${escapeHtml(recipe.name)}</h3>
+                    <span class="recipe-cuisine">${escapeHtml(recipe.cuisineType || 'International')}</span>
+                </div>
+                <div class="recipe-body">
+                    <p class="recipe-description">${escapeHtml(recipe.description || 'A delicious recipe for you to try!')}</p>
+                    <div class="recipe-meta">
+                        <span>👥 ${recipe.servings || 0} servings</span>
+                        <span>⏱️ ${totalTime} min</span>
+                    </div>
+                    <span class="difficulty ${difficultyClass}">${escapeHtml(recipe.difficultyLevel || 'Medium')}</span>
+                </div>
+                <div class="recipe-footer">
+                    <span class="servings">${recipe.servings || 0} servings</span>
+                    <a href="#" class="view-recipe" onclick="viewRecipe(${recipe.id}); return false;">View Recipe</a>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        /**
+         * Apply filters and display matching recipes
+         */
+        function applyFilters() {
+            const difficulty = difficultySelect.value;
+            const cuisine = cuisineSelect.value;
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            const filtered = allRecipes.filter(recipe => {
+                const matchesDifficulty = !difficulty || recipe.difficultyLevel === difficulty;
+                const matchesCuisine = !cuisine || recipe.cuisineType === cuisine;
+                const matchesSearch = !searchTerm || recipe.name.toLowerCase().includes(searchTerm);
+                
+                return matchesDifficulty && matchesCuisine && matchesSearch;
+            });
+            
+            displayRecipes(filtered);
+        }
+        
+        /**
+         * Escape HTML to prevent XSS attacks
+         * @param {String} text - The text to escape
+         * @returns {String} The escaped text
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        /**
+         * View recipe details (placeholder for future implementation)
+         * @param {Number} recipeId - The recipe ID
+         */
+        function viewRecipe(recipeId) {
+            console.log('View recipe:', recipeId);
+            // TODO: Implement modal or detail view for recipe
+        }
+        
+        // Event listeners for filters
+        difficultySelect.addEventListener('change', applyFilters);
+        cuisineSelect.addEventListener('change', applyFilters);
+        searchInput.addEventListener('input', applyFilters);
+        
+        // Load recipes when page loads
+        document.addEventListener('DOMContentLoaded', loadRecipes);
     </script>
 </body>
 </html>

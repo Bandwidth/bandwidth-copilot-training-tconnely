@@ -42,23 +42,115 @@ public class RecipeController {
     }
     
     /**
-     * Get recipes by difficulty level
-     * NOTE: Workshop participants will implement this endpoint using Copilot
+     * Get the recipe of the day
+     * Returns a deterministic recipe based on the current date
      */
-    // TODO: Implement GET /api/recipes/difficulty/{level} endpoint
+    @GetMapping("/daily")
+    public ResponseEntity<Recipe> getDailyRecipe() {
+        return recipeService.getDailyRecipe()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    /**
+     * Get recipes by difficulty level
+     * Returns all recipes matching the specified difficulty level
+     * 
+     * @param level the difficulty level (Easy, Medium, Hard)
+     * @return list of recipes with the specified difficulty
+     */
+    @GetMapping("/difficulty/{level}")
+    public ResponseEntity<List<Recipe>> getRecipesByDifficulty(@PathVariable String level) {
+        return ResponseEntity.ok(recipeService.getRecipesByDifficulty(level));
+    }
     
     /**
      * Get recipes by cuisine type
-     * NOTE: Workshop participants will implement this endpoint using Copilot
+     * Returns all recipes matching the specified cuisine type
+     * 
+     * @param type the cuisine type (Italian, Mexican, Asian, etc.)
+     * @return list of recipes with the specified cuisine
      */
-    // TODO: Implement GET /api/recipes/cuisine/{type} endpoint
+    @GetMapping("/cuisine/{type}")
+    public ResponseEntity<List<Recipe>> getRecipesByCuisine(@PathVariable String type) {
+        return ResponseEntity.ok(recipeService.getRecipesByCuisine(type));
+    }
     
     /**
      * Recommend recipes based on available pantry ingredients
-     * NOTE: This is an advanced endpoint to be implemented during the workshop
+     * Scores recipes by how many ingredients the user already has
+     * Returns recipes sorted by match count (most ingredients available first)
+     * 
+     * @param userId the user ID to get recommendations for
+     * @return list of recipes with matching ingredients, sorted by match count
      */
-    // TODO: Implement GET /api/recipes/recommendations endpoint
+    @GetMapping("/recommended")
+    public ResponseEntity<List<Recipe>> getRecommendedRecipes(@RequestParam Long userId) {
+        return ResponseEntity.ok(recipeService.recommendRecipesByPantryIngredients(userId));
+    }
     
+    /**
+     * Get recipes that can be made COMPLETELY with available pantry ingredients
+     * All ingredients required by the recipe must be in the user's pantry
+     * Much more restrictive than /recommended endpoint
+     * 
+     * @param userId the user ID to get recipes for
+     * @return list of recipes that can be made completely
+     */
+    @GetMapping("/makeable")
+    public ResponseEntity<List<Recipe>> getMakeableRecipes(@RequestParam Long userId) {
+        return ResponseEntity.ok(recipeService.findCompleteRecipesByPantry(userId));
+    }
+    
+    /**
+     * Get recipes that are missing only a few ingredients
+     * Useful for suggesting recipes the user is close to being able to make
+     * 
+     * @param userId the user ID to get recipes for
+     * @param maxMissing the maximum number of missing ingredients allowed (default 2)
+     * @return list of recipes missing at most maxMissing ingredients
+     */
+    @GetMapping("/almost-makeable")
+    public ResponseEntity<List<Recipe>> getAlmostMakeableRecipes(
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "2") int maxMissing) {
+        return ResponseEntity.ok(recipeService.findRecipesMissingFewIngredients(userId, maxMissing));
+    }
+    
+    /**
+     * Advanced filtering endpoint combining multiple criteria
+     * All specified filters are combined with AND logic (recipe must match ALL criteria)
+     * 
+     * @param userId optional user ID for pantry ingredient matching
+     * @param difficulty optional difficulty level (Easy, Medium, Hard)
+     * @param cuisineType optional cuisine type (Italian, Mexican, Asian, etc.)
+     * @param maxCookingTime optional maximum total cooking time in minutes
+     * @param minIngredientMatch optional minimum ingredient match percentage (0-100)
+     * @return list of recipes matching all specified criteria
+     */
+    @GetMapping("/filter")
+    public ResponseEntity<List<Recipe>> filterRecipes(
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) String cuisineType,
+            @RequestParam(required = false) Integer maxCookingTime,
+            @RequestParam(required = false) Integer minIngredientMatch) {
+        return ResponseEntity.ok(recipeService.getRecipesByAdvancedFilter(
+            userId, difficulty, cuisineType, maxCookingTime, minIngredientMatch));
+    }
+    
+    /**
+     * Convenience endpoint for quick recipes
+     * Returns recipes that can be completed within a specified time limit
+     * 
+     * @param maxMinutes the maximum total cooking time in minutes
+     * @return list of recipes that fit within the time budget
+     */
+    @GetMapping("/quick")
+    public ResponseEntity<List<Recipe>> getQuickRecipes(@RequestParam Integer maxMinutes) {
+        return ResponseEntity.ok(recipeService.getQuickRecipes(maxMinutes));
+    }
+
     @PostMapping
     public ResponseEntity<Recipe> createRecipe(@Valid @RequestBody Recipe recipe) {
         Recipe saved = recipeService.saveRecipe(recipe);
