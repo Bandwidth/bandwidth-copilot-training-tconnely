@@ -55,6 +55,34 @@ public class RecipeService {
     }
     
     /**
+     * Add a rating to a recipe and update the average rating
+     * @param recipeId The ID of the recipe to rate
+     * @param rating The rating value (1-5)
+     * @return The updated recipe with new rating
+     * @throws IllegalArgumentException if rating is not between 1 and 5
+     * @throws java.util.NoSuchElementException if recipe is not found
+     */
+    @Transactional
+    public Recipe addRating(Long recipeId, Integer rating) {
+        if (rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
+        
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new java.util.NoSuchElementException("Recipe not found"));
+        
+        // Calculate new average rating
+        Double oldRating = recipe.getAverageRating();
+        Integer oldCount = recipe.getRatingCount();
+        Double newAverage = ((oldRating * oldCount) + rating) / (oldCount + 1);
+        
+        recipe.setAverageRating(newAverage);
+        recipe.setRatingCount(oldCount + 1);
+        
+        return recipeRepository.save(recipe);
+    }
+    
+    /**
      * Get the recipe of the day based on current date
      * Uses a deterministic algorithm: the recipe index is calculated from the day of year
      * This ensures the same recipe is returned for all requests on the same day

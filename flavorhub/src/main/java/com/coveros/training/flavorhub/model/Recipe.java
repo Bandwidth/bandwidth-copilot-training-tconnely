@@ -62,6 +62,12 @@ public class Recipe {
     @Column(name = "image_url")
     private String imageUrl;
     
+    @Column(name = "average_rating")
+    private Double averageRating = 0.0;
+    
+    @Column(name = "rating_count")
+    private Integer ratingCount = 0;
+    
     public Recipe(String name, String description, Integer prepTime, Integer cookTime, 
                   Integer servings, String difficultyLevel, String cuisineType) {
         this.name = name;
@@ -71,5 +77,7 @@ public class Recipe {
         this.servings = servings;
         this.difficultyLevel = difficultyLevel;
         this.cuisineType = cuisineType;
+        this.averageRating = 0.0;
+        this.ratingCount = 0;
     }
 }

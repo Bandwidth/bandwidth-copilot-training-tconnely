@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -539,5 +540,89 @@ class RecipeServiceTest {
         assertEquals(1, result.size());
         assertEquals("Tacos", result.get(0).getName());
         verify(recipeRepository).findAll();
+    }
+    
+    // ============= Rating Tests =============
+    
+    @Test
+    void testAddRating_WhenFirstRating_ThenReturnsCorrectAverage() {
+        // Arrange
+        testRecipe.setAverageRating(0.0);
+        testRecipe.setRatingCount(0);
+        when(recipeRepository.findById(1L)).thenReturn(Optional.of(testRecipe));
+        when(recipeRepository.save(any(Recipe.class))).thenReturn(testRecipe);
+        
+        // Act
+        Recipe result = recipeService.addRating(1L, 5);
+        
+        // Assert
+        assertEquals(5.0, result.getAverageRating());
+        assertEquals(1, result.getRatingCount());
+        verify(recipeRepository, times(1)).save(testRecipe);
+    }
+    
+    @Test
+    void testAddRating_WhenMultipleRatings_ThenCalculatesCorrectAverage() {
+        // Arrange
+        testRecipe.setAverageRating(4.5);
+        testRecipe.setRatingCount(4);
+        when(recipeRepository.findById(1L)).thenReturn(Optional.of(testRecipe));
+        when(recipeRepository.save(any(Recipe.class))).thenReturn(testRecipe);
+        
+        // Act
+        Recipe result = recipeService.addRating(1L, 3);
+        
+        // Assert
+        // Expected: ((4.5 * 4) + 3) / 5 = 4.2
+        assertEquals(4.2, result.getAverageRating(), 0.01);
+        assertEquals(5, result.getRatingCount());
+        verify(recipeRepository, times(1)).save(testRecipe);
+    }
+    
+    @Test
+    void testAddRating_WhenRatingLessThan1_ThenThrowsIllegalArgumentException() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            recipeService.addRating(1L, 0);
+        });
+        verify(recipeRepository, never()).save(any());
+    }
+    
+    @Test
+    void testAddRating_WhenRatingGreaterThan5_ThenThrowsIllegalArgumentException() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            recipeService.addRating(1L, 6);
+        });
+        verify(recipeRepository, never()).save(any());
+    }
+    
+    @Test
+    void testAddRating_WhenRecipeNotFound_ThenThrowsNoSuchElementException() {
+        // Arrange
+        when(recipeRepository.findById(999L)).thenReturn(Optional.empty());
+        
+        // Act & Assert
+        assertThrows(NoSuchElementException.class, () -> {
+            recipeService.addRating(999L, 5);
+        });
+        verify(recipeRepository, never()).save(any());
+    }
+    
+    @Test
+    void testAddRating_WhenValidRating_ThenVerifiesTransactional() {
+        // Arrange
+        testRecipe.setAverageRating(3.0);
+        testRecipe.setRatingCount(2);
+        when(recipeRepository.findById(1L)).thenReturn(Optional.of(testRecipe));
+        when(recipeRepository.save(any(Recipe.class))).thenReturn(testRecipe);
+        
+        // Act
+        Recipe result = recipeService.addRating(1L, 4);
+        
+        // Assert
+        // Expected: ((3.0 * 2) + 4) / 3 = 10/3 = 3.333...
+        assertEquals(3.33, result.getAverageRating(), 0.01);
+        assertEquals(3, result.getRatingCount());
     }
 }

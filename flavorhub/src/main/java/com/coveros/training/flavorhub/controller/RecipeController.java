@@ -1,5 +1,6 @@
 package com.coveros.training.flavorhub.controller;
 
+import com.coveros.training.flavorhub.dto.RatingRequest;
 import com.coveros.training.flavorhub.model.Recipe;
 import com.coveros.training.flavorhub.service.RecipeService;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * REST Controller for managing recipes
@@ -173,5 +175,25 @@ public class RecipeController {
     public ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
         recipeService.deleteRecipe(id);
         return ResponseEntity.noContent().build();
+    }
+    
+    /**
+     * Add a rating to a recipe
+     * @param id The recipe ID
+     * @param ratingRequest The rating request containing the rating value (1-5)
+     * @return Updated recipe with new rating
+     */
+    @PutMapping("/{id}/rate")
+    public ResponseEntity<Recipe> rateRecipe(
+            @PathVariable Long id,
+            @Valid @RequestBody RatingRequest ratingRequest) {
+        try {
+            Recipe updatedRecipe = recipeService.addRating(id, ratingRequest.getRating());
+            return ResponseEntity.ok(updatedRecipe);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
