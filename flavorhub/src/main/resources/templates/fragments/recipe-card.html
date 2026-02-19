@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<!-- Recipe Card Fragment -->
+<!-- Usage: <div th:replace="fragments/recipe-card :: recipe-card(recipe=${recipe})"></div> -->
+<div th:fragment="recipe-card(recipe)" class="recipe-card" th:aria-label="'Recipe card for ' + ${recipe.name}">
+    
+    <!-- Recipe Header with Image -->
+    <div class="recipe-card-header">
+        <img th:if="${recipe.imageUrl}" 
+             th:src="${recipe.imageUrl}" 
+             th:alt="${recipe.name}"
+             class="recipe-card-image"
+             aria-label="Recipe image for " th:aria-label="'Recipe image for ' + ${recipe.name}" />
+        <img th:unless="${recipe.imageUrl}" 
+             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23667eea' width='400' height='300'/%3E%3Ctext x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='24' fill='white'%3ENo Image%3C/text%3E%3C/svg%3E"
+             th:alt="${recipe.name}"
+             class="recipe-card-image recipe-card-image-placeholder"
+             aria-label="Recipe placeholder image" />
+        <span class="difficulty-badge" 
+              th:classappend="${'difficulty-' + recipe.difficultyLevel.toLowerCase()}"
+              th:text="${recipe.difficultyLevel}"
+              role="status"
+              aria-label="Difficulty level: " th:aria-label="'Difficulty level: ' + ${recipe.difficultyLevel}">
+        </span>
+    </div>
+    
+    <!-- Recipe Body -->
+    <div class="recipe-card-body">
+        <!-- Recipe Title -->
+        <h3 class="recipe-card-title" th:text="${recipe.name}">Recipe Name</h3>
+        
+        <!-- Recipe Cuisine Badge -->
+        <span class="cuisine-badge" 
+              th:text="${recipe.cuisineType}"
+              role="status"
+              aria-label="Cuisine type: " th:aria-label="'Cuisine type: ' + ${recipe.cuisineType}">
+        </span>
+        
+        <!-- Recipe Description -->
+        <p class="recipe-card-description" 
+           th:text="${recipe.description}" 
+           th:if="${recipe.description}"
+           aria-label="Recipe description">
+        </p>
+        <p class="recipe-card-description recipe-card-description-empty" 
+           th:unless="${recipe.description}"
+           aria-label="No description available">
+            No description available
+        </p>
+        
+        <!-- Recipe Metadata -->
+        <div class="recipe-card-metadata">
+            <!-- Prep Time -->
+            <div class="metadata-item" 
+                 th:if="${recipe.prepTime}"
+                 aria-label="Preparation time: " th:aria-label="'Preparation time: ' + ${recipe.prepTime} + ' minutes'">
+                <span class="metadata-label">Prep:</span>
+                <span class="metadata-value" th:text="${recipe.prepTime} + ' min'">10 min</span>
+            </div>
+            
+            <!-- Cook Time -->
+            <div class="metadata-item"
+                 th:if="${recipe.cookTime}"
+                 aria-label="Cook time: " th:aria-label="'Cook time: ' + ${recipe.cookTime} + ' minutes'">
+                <span class="metadata-label">Cook:</span>
+                <span class="metadata-value" th:text="${recipe.cookTime} + ' min'">15 min</span>
+            </div>
+            
+            <!-- Servings -->
+            <div class="metadata-item"
+                 th:if="${recipe.servings}"
+                 aria-label="Servings: " th:aria-label="'Servings: ' + ${recipe.servings}">
+                <span class="metadata-label">Serves:</span>
+                <span class="metadata-value" th:text="${recipe.servings}">4</span>
+            </div>
+        </div>
+        
+        <!-- Recipe Ingredients Count -->
+        <div class="recipe-card-ingredients" 
+             th:if="${recipe.ingredients and recipe.ingredients.size() > 0}"
+             aria-label="Number of ingredients: " th:aria-label="'Number of ingredients: ' + ${recipe.ingredients.size()}">
+            <span class="ingredients-count" th:text="${recipe.ingredients.size()} + ' ingredients'">3 ingredients</span>
+        </div>
+    </div>
+    
+    <!-- Recipe Footer with Action -->
+    <div class="recipe-card-footer">
+        <a class="recipe-card-link" 
+           th:href="@{/recipes/{id}(id=${recipe.id})}"
+           role="button"
+           arial-label="View recipe for " th:aria-label="'View recipe for ' + ${recipe.name}">
+            View Recipe
+        </a>
+    </div>
+    
+</div>
+
+<style>
+    /* Recipe Card Styles */
+    .recipe-card {
+        display: flex;
+        flex-direction: column;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        cursor: pointer;
+    }
+    
+    .recipe-card:hover {
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        transform: translateY(-4px);
+    }
+    
+    .recipe-card:focus-within {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+    
+    /* Card Header */
+    .recipe-card-header {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        overflow: hidden;
+    }
+    
+    .recipe-card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s ease;
+    }
+    
+    .recipe-card-image-placeholder {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .recipe-card:hover .recipe-card-image {
+        transform: scale(1.05);
+    }
+    
+    /* Difficulty Badge */
+    .difficulty-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(8px);
+        animation: slideIn 0.3s ease forwards;
+    }
+    
+    .difficulty-easy {
+        background: rgba(76, 175, 80, 0.9);
+        color: white;
+    }
+    
+    .difficulty-medium {
+        background: rgba(255, 193, 7, 0.9);
+        color: #333;
+    }
+    
+    .difficulty-hard {
+        background: rgba(244, 67, 54, 0.9);
+        color: white;
+    }
+    
+    /* Card Body */
+    .recipe-card-body {
+        flex: 1;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    /* Recipe Title */
+    .recipe-card-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+        line-height: 1.4;
+    }
+    
+    /* Cuisine Badge */
+    .cuisine-badge {
+        display: inline-block;
+        background: #f0f0f0;
+        color: #666;
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 500;
+        width: fit-content;
+    }
+    
+    /* Description */
+    .recipe-card-description {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .recipe-card-description-empty {
+        color: #999;
+        font-style: italic;
+    }
+    
+    /* Metadata */
+    .recipe-card-metadata {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 12px;
+        margin-top: 8px;
+        padding-top: 12px;
+        border-top: 1px solid #e0e0e0;
+        font-size: 13px;
+    }
+    
+    .metadata-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .metadata-label {
+        font-weight: 600;
+        color: #999;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+    }
+    
+    .metadata-value {
+        color: #333;
+        font-weight: 500;
+    }
+    
+    /* Ingredients Count */
+    .recipe-card-ingredients {
+        font-size: 13px;
+        color: #667eea;
+        font-weight: 500;
+        margin-top: 4px;
+    }
+    
+    .ingredients-count {
+        display: inline-block;
+    }
+    
+    /* Card Footer */
+    .recipe-card-footer {
+        padding: 12px 16px;
+        border-top: 1px solid #e0e0e0;
+        background: #fafafa;
+    }
+    
+    /* Recipe Link Button */
+    .recipe-card-link {
+        display: inline-block;
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .recipe-card-link:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .recipe-card-link:active {
+        transform: scale(0.98);
+    }
+    
+    .recipe-card-link:focus {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+    
+    /* Animations */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .recipe-card {
+            border-radius: 10px;
+        }
+        
+        .recipe-card-header {
+            height: 160px;
+        }
+        
+        .recipe-card-body {
+            padding: 14px;
+            gap: 8px;
+        }
+        
+        .recipe-card-title {
+            font-size: 16px;
+        }
+        
+        .recipe-card-description {
+            -webkit-line-clamp: 1;
+            font-size: 13px;
+        }
+        
+        .recipe-card-metadata {
+            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            gap: 8px;
+            font-size: 12px;
+        }
+        
+        .metadata-label {
+            font-size: 10px;
+        }
+        
+        .recipe-card-link {
+            padding: 9px 14px;
+            font-size: 13px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .recipe-card-header {
+            height: 140px;
+        }
+        
+        .difficulty-badge {
+            padding: 5px 10px;
+            font-size: 11px;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .recipe-card-body {
+            padding: 12px;
+            gap: 6px;
+        }
+        
+        .recipe-card-title {
+            font-size: 15px;
+        }
+        
+        .cuisine-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+        }
+    }
+    
+</style>
+
+</body>
+</html>

@@ -60,6 +60,471 @@
             margin-bottom: 15px;
         }
         
+        /* Search Section Styles */
+        .search-section {
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .search-box-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s ease;
+            display: block;
+            min-height: 48px;
+        }
+        
+        .search-box:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+        
+        .autocomplete-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item:hover,
+        .autocomplete-item.active {
+            background-color: #f8f9fa;
+            color: #667eea;
+        }
+        
+        .search-status {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-size: 1.1em;
+        }
+        
+        .search-status.loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .search-results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .recipe-result-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .recipe-result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
+        }
+        
+        .recipe-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+        
+        .recipe-card-header h3 {
+            margin: 0;
+            font-size: 1.3em;
+        }
+        
+        .recipe-card-body {
+            padding: 20px;
+        }
+        
+        .recipe-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        
+        .recipe-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .cuisine-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .difficulty-badge.Easy {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .difficulty-badge.Medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .difficulty-badge.Hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .recipe-time {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .search-box {
+                font-size: 16px;
+                padding: 12px 15px;
+            }
+            
+            .recipe-result-card {
+                margin: 0;
+            }
+        }
+        
+        /* Recipe of the Day Styles */
+        .daily-recipe-section {
+            margin-bottom: 50px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            padding: 40px 20px;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .daily-recipe-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .daily-recipe-section > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .daily-recipe-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .daily-recipe-header h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .daily-recipe-header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .daily-recipe-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+            border: 2px solid #667eea;
+            transition: all 0.3s ease;
+            animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .daily-recipe-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.35);
+        }
+        
+        .daily-recipe-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .daily-recipe-card-header h3 {
+            margin: 0;
+            font-size: 2em;
+            font-weight: 600;
+            word-break: break-word;
+        }
+        
+        .daily-recipe-card-body {
+            padding: 30px;
+        }
+        
+        .daily-recipe-description {
+            color: #333;
+            font-size: 1.05em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .daily-recipe-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .daily-recipe-times {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .time-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 0.95em;
+        }
+        
+        .time-item strong {
+            color: #667eea;
+        }
+        
+        .daily-recipe-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 6px;
+        }
+        
+        .daily-recipe-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .daily-recipe-button:active {
+            transform: translateY(0);
+        }
+        
+        .daily-recipe-button.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .daily-recipe-button.secondary:hover {
+            background: #f8f9fa;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .daily-recipe-actions {
+            text-align: center;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .daily-recipe-loading {
+            text-align: center;
+            padding: 60px 40px;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-right: 4px solid #764ba2;
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .daily-recipe-error {
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+            font-size: 1.1em;
+            background: #fff5f5;
+            border-radius: 8px;
+            border: 1px solid #f8d7da;
+        }
+        
+        @media (max-width: 768px) {
+            .daily-recipe-section {
+                padding: 20px 15px;
+                margin-bottom: 30px;
+            }
+            
+            .daily-recipe-header h2 {
+                font-size: 1.5em;
+            }
+            
+            .daily-recipe-header p {
+                font-size: 0.95em;
+            }
+            
+            .daily-recipe-card-header h3 {
+                font-size: 1.4em;
+            }
+            
+            .daily-recipe-card-body {
+                padding: 20px;
+            }
+            
+            .daily-recipe-description {
+                font-size: 0.95em;
+                margin-bottom: 15px;
+            }
+            
+            .daily-recipe-times {
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            
+            .time-item {
+                font-size: 0.9em;
+                justify-content: center;
+            }
+            
+            .daily-recipe-meta {
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            
+            .recipe-badge {
+                font-size: 0.8em;
+                padding: 4px 10px;
+            }
+            
+            .daily-recipe-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .daily-recipe-button {
+                width: 100%;
+                padding: 14px 20px;
+                font-size: 0.95em;
+                margin: 0;
+            }
+        }
+        
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -72,16 +537,38 @@
             padding: 25px;
             border-radius: 8px;
             border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
+            border-left-width: 6px;
         }
         
         .feature-card h3 {
             color: #333;
             margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .feature-card:hover h3 {
+            color: #667eea;
         }
         
         .feature-card p {
             color: #666;
             font-size: 0.95em;
+        }
+        
+        .feature-card a {
+            transition: color 0.3s ease;
+        }
+        
+        .feature-card a:hover {
+            color: #764ba2;
         }
         
         .api-section {
@@ -163,6 +650,37 @@
                 <p>Learn to use GitHub Copilot by building features for this recipe recommendation application</p>
             </div>
             
+            <!-- Recipe of the Day Section -->
+            <div class="daily-recipe-section">
+                <div class="daily-recipe-header">
+                    <h2>🌟 Recipe of the Day 🌟</h2>
+                    <p>Discover today's featured recipe!</p>
+                </div>
+                <div id="dailyRecipeContainer">
+                    <div class="daily-recipe-loading">
+                        <div>Loading today's recipe...</div>
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Interactive Recipe Search Section -->
+            <div class="search-section">
+                <div class="search-box-container">
+                    <input 
+                        type="text" 
+                        id="recipeSearch" 
+                        class="search-box" 
+                        placeholder="Search recipes by name..." 
+                        aria-label="Search recipes"
+                        autocomplete="off"
+                    />
+                    <div id="autocomplete" class="autocomplete-dropdown"></div>
+                </div>
+                <div id="searchStatus" class="search-status" role="status">Start typing to search recipes...</div>
+                <div id="searchResults" class="search-results-grid"></div>
+            </div>
+            
             <div class="features">
                 <div class="feature-card">
                     <h3>📦 Pantry Management</h3>
@@ -239,5 +757,482 @@
             <p>Access H2 Console at: <a href="/h2-console" target="_blank">/h2-console</a></p>
         </footer>
     </div>
+    
+    <script>
+        // Fetch and display Recipe of the Day on page load
+        async function loadDailyRecipe() {
+            const container = document.getElementById('dailyRecipeContainer');
+            
+            try {
+                const response = await fetch('/api/recipes/daily');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch daily recipe');
+                }
+                
+                const recipe = await response.json();
+                displayDailyRecipe(recipe);
+                
+            } catch (error) {
+                console.error('Error loading daily recipe:', error);
+                container.innerHTML = '<div class="daily-recipe-error">⚠️ Unable to load today\'s recipe. Please try again later.</div>';
+            }
+        }
+        
+        // Display the daily recipe card
+        function displayDailyRecipe(recipe) {
+            const container = document.getElementById('dailyRecipeContainer');
+            
+            const cuisineText = recipe.cuisineType || 'International';
+            const difficultyText = recipe.difficultyLevel || 'Medium';
+            const prepTime = recipe.prepTime || 0;
+            const cookTime = recipe.cookTime || 0;
+            const totalTime = prepTime + cookTime;
+            const description = recipe.description || 'A delicious recipe for you to try today!';
+            
+            const card = document.createElement('div');
+            card.className = 'daily-recipe-card fade-in';
+            
+            card.innerHTML = `
+                <div class="daily-recipe-card-header">
+                    <h3>${escapeHtml(recipe.name)}</h3>
+                </div>
+                <div class="daily-recipe-card-body">
+                    <p class="daily-recipe-description">${escapeHtml(description)}</p>
+                    <div class="daily-recipe-meta">
+                        <span class="recipe-badge cuisine-badge">${escapeHtml(cuisineText)}</span>
+                        <span class="recipe-badge difficulty-badge ${escapeHtml(difficultyText)}">${escapeHtml(difficultyText)}</span>
+                    </div>
+                    <div class="daily-recipe-times">
+                        <div class="time-item">
+                            <span>⏱️</span>
+                            <span><strong>Total Time:</strong> ${totalTime} minutes</span>
+                        </div>
+                        <div class="time-item">
+                            <span>🔪</span>
+                            <span><strong>Prep:</strong> ${prepTime} min</span>
+                        </div>
+                        <div class="time-item">
+                            <span>🍳</span>
+                            <span><strong>Cook:</strong> ${cookTime} min</span>
+                        </div>
+                    </div>
+                    <div class="daily-recipe-actions">
+                        <a href="/recipes" class="daily-recipe-button">View Full Recipe</a>
+                        <button class="daily-recipe-button secondary" onclick="loadRandomRecipe()">🎲 Show Random Recipe</button>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = '';
+            container.appendChild(card);
+        }
+        
+        // Load a random recipe
+        async function loadRandomRecipe() {
+            const container = document.getElementById('dailyRecipeContainer');
+            
+            // Show loading state
+            container.innerHTML = `
+                <div class="daily-recipe-loading">
+                    <div>Fetching a random recipe...</div>
+                    <div class="spinner"></div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/recipes');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch recipes');
+                }
+                
+                const recipes = await response.json();
+                
+                if (recipes.length === 0) {
+                    throw new Error('No recipes available');
+                }
+                
+                // Select a random recipe
+                const randomIndex = Math.floor(Math.random() * recipes.length);
+                const randomRecipe = recipes[randomIndex];
+                
+                displayDailyRecipe(randomRecipe);
+                
+            } catch (error) {
+                console.error('Error loading random recipe:', error);
+                container.innerHTML = '<div class="daily-recipe-error">⚠️ Unable to load a random recipe. Please try again.</div>';
+            }
+        }
+        
+        // Load daily recipe when page loads
+        document.addEventListener('DOMContentLoaded', loadDailyRecipe);
+        
+        // Debounce helper function to limit API calls
+        function debounce(func, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+        
+        // Get DOM elements
+        const searchInput = document.getElementById('recipeSearch');
+        const searchResults = document.getElementById('searchResults');
+        const searchStatus = document.getElementById('searchStatus');
+        const autocompleteDropdown = document.getElementById('autocomplete');
+        
+        let currentFocus = -1;
+        
+        // Search recipes function
+        async function searchRecipes(query) {
+            // Clear results if query is too short
+            if (query.length < 2) {
+                searchResults.innerHTML = '';
+                autocompleteDropdown.classList.remove('show');
+                searchStatus.textContent = 'Start typing to search recipes...';
+                searchStatus.classList.remove('loading');
+                return;
+            }
+            
+            // Show loading state
+            searchStatus.textContent = 'Searching recipes...';
+            searchStatus.classList.add('loading');
+            
+            try {
+                const response = await fetch(`/api/recipes/search?query=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch recipes');
+                }
+                
+                const recipes = await response.json();
+                
+                // Show autocomplete suggestions
+                showAutocomplete(recipes.slice(0, 5));
+                
+                // Display results
+                displayResults(recipes);
+                
+            } catch (error) {
+                console.error('Error searching recipes:', error);
+                searchStatus.textContent = 'Something went wrong. Please try again.';
+                searchStatus.classList.remove('loading');
+                searchResults.innerHTML = '';
+                autocompleteDropdown.classList.remove('show');
+            }
+        }
+        
+        // Display autocomplete suggestions
+        function showAutocomplete(recipes) {
+            autocompleteDropdown.innerHTML = '';
+            
+            if (recipes.length === 0) {
+                autocompleteDropdown.classList.remove('show');
+                return;
+            }
+            
+            recipes.forEach((recipe, index) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.textContent = recipe.name;
+                item.addEventListener('click', () => {
+                    searchInput.value = recipe.name;
+                    autocompleteDropdown.classList.remove('show');
+                    searchRecipes(recipe.name);
+                });
+                autocompleteDropdown.appendChild(item);
+            });
+            
+            autocompleteDropdown.classList.add('show');
+        }
+        
+        // Display search results
+        function displayResults(recipes) {
+            searchStatus.classList.remove('loading');
+            searchResults.innerHTML = '';
+            
+            if (recipes.length === 0) {
+                searchStatus.textContent = 'No recipes found. Try a different search term.';
+                return;
+            }
+            
+            searchStatus.textContent = `Found ${recipes.length} recipe${recipes.length !== 1 ? 's' : ''}`;
+            
+            recipes.forEach(recipe => {
+                const card = createRecipeCard(recipe);
+                searchResults.appendChild(card);
+            });
+        }
+        
+        // Create recipe card element
+        function createRecipeCard(recipe) {
+            const card = document.createElement('div');
+            card.className = 'recipe-result-card fade-in';
+            
+            const cuisineText = recipe.cuisineType || 'N/A';
+            const difficultyText = recipe.difficultyLevel || 'N/A';
+            const prepTime = recipe.prepTime || 0;
+            const cookTime = recipe.cookTime || 0;
+            const totalTime = prepTime + cookTime;
+            
+            card.innerHTML = `
+                <div class="recipe-card-header">
+                    <h3>${escapeHtml(recipe.name)}</h3>
+                    <button class="favorite-btn" data-id="${recipe.id}" aria-label="Toggle favorite" title="Toggle favorite">
+                        <span class="heart-icon">♡</span>
+                    </button>
+                </div>
+                <div class="recipe-card-body">
+                    <div class="recipe-meta">
+                        <span class="recipe-badge cuisine-badge">${escapeHtml(cuisineText)}</span>
+                        <span class="recipe-badge difficulty-badge ${escapeHtml(difficultyText)}">${escapeHtml(difficultyText)}</span>
+                    </div>
+                    <div class="recipe-time">
+                        ⏱️ ${totalTime} min (Prep: ${prepTime} min | Cook: ${cookTime} min)
+                    </div>
+                </div>
+            `;
+                    // --- Favorites Feature ---
+                    // Favorite recipes management
+                    function getFavorites() {
+                        try {
+                            return JSON.parse(localStorage.getItem('favoriteRecipes') || '[]');
+                        } catch {
+                            return [];
+                        }
+                    }
+
+                    function setFavorites(favorites) {
+                        localStorage.setItem('favoriteRecipes', JSON.stringify(favorites));
+                    }
+
+                    function isFavorite(recipeId) {
+                        return getFavorites().includes(recipeId);
+                    }
+
+                    function toggleFavorite(recipeId) {
+                        let favorites = getFavorites();
+                        if (favorites.includes(recipeId)) {
+                            favorites = favorites.filter(id => id !== recipeId);
+                        } else {
+                            favorites.push(recipeId);
+                        }
+                        setFavorites(favorites);
+                    }
+
+                    // Update heart icon for all recipe cards
+                    function updateFavoriteIcons() {
+                        document.querySelectorAll('.favorite-btn').forEach(btn => {
+                            const recipeId = btn.getAttribute('data-id');
+                            const heart = btn.querySelector('.heart-icon');
+                            if (isFavorite(recipeId)) {
+                                heart.textContent = '❤️';
+                                btn.classList.add('favorited');
+                            } else {
+                                heart.textContent = '♡';
+                                btn.classList.remove('favorited');
+                            }
+                        });
+                    }
+
+                    // Handle favorite button click
+                    document.addEventListener('click', function(e) {
+                        if (e.target.closest('.favorite-btn')) {
+                            const btn = e.target.closest('.favorite-btn');
+                            const recipeId = btn.getAttribute('data-id');
+                            toggleFavorite(recipeId);
+                            updateFavoriteIcons();
+                        }
+                    });
+
+                    // Visual feedback on hover
+                    document.addEventListener('mouseover', function(e) {
+                        if (e.target.closest('.favorite-btn')) {
+                            e.target.closest('.favorite-btn').classList.add('hovered');
+                        }
+                    });
+                    document.addEventListener('mouseout', function(e) {
+                        if (e.target.closest('.favorite-btn')) {
+                            e.target.closest('.favorite-btn').classList.remove('hovered');
+                        }
+                    });
+
+                    // Filter favorites
+                    function filterFavorites() {
+                        const favorites = getFavorites();
+                        const allCards = Array.from(document.querySelectorAll('.recipe-result-card'));
+                        allCards.forEach(card => {
+                            const btn = card.querySelector('.favorite-btn');
+                            if (!btn) return;
+                            const recipeId = btn.getAttribute('data-id');
+                            if (favorites.includes(recipeId)) {
+                                card.style.display = '';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    // Show all recipes
+                    function showAllRecipes() {
+                        document.querySelectorAll('.recipe-result-card').forEach(card => {
+                            card.style.display = '';
+                        });
+                    }
+
+                    // Add filter button
+                    function addFavoritesFilterButton() {
+                        const searchSection = document.querySelector('.search-section');
+                        if (!searchSection || document.getElementById('favoritesFilterBtn')) return;
+                        const btn = document.createElement('button');
+                        btn.id = 'favoritesFilterBtn';
+                        btn.className = 'favorites-filter-btn';
+                        btn.textContent = 'My Favorites';
+                        btn.style.marginBottom = '20px';
+                        btn.style.background = '#667eea';
+                        btn.style.color = 'white';
+                        btn.style.border = 'none';
+                        btn.style.borderRadius = '8px';
+                        btn.style.padding = '12px 24px';
+                        btn.style.fontSize = '1em';
+                        btn.style.cursor = 'pointer';
+                        btn.style.boxShadow = '0 2px 8px rgba(102,126,234,0.15)';
+                        btn.style.transition = 'background 0.2s, color 0.2s';
+                        btn.addEventListener('click', function() {
+                            if (btn.classList.toggle('active')) {
+                                filterFavorites();
+                                btn.textContent = 'Show All';
+                            } else {
+                                showAllRecipes();
+                                btn.textContent = 'My Favorites';
+                            }
+                        });
+                        searchSection.insertBefore(btn, searchSection.firstChild);
+                    }
+
+                    // Ensure favorites persist across reloads
+                    document.addEventListener('DOMContentLoaded', function() {
+                        addFavoritesFilterButton();
+                        updateFavoriteIcons();
+                    });
+                    /* --- Favorites Feature Styles --- */
+                    .favorite-btn {
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        font-size: 1.5em;
+                        margin-left: 12px;
+                        transition: color 0.2s, transform 0.2s;
+                        color: #667eea;
+                        vertical-align: middle;
+                        outline: none;
+                    }
+                    .favorite-btn.favorited .heart-icon {
+                        color: #667eea;
+                        font-size: 1.5em;
+                    }
+                    .favorite-btn .heart-icon {
+                        transition: color 0.2s, transform 0.2s;
+                    }
+                    .favorite-btn.hovered .heart-icon {
+                        color: #764ba2;
+                        transform: scale(1.2);
+                    }
+                    .favorites-filter-btn {
+                        background: #667eea;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        padding: 12px 24px;
+                        font-size: 1em;
+                        cursor: pointer;
+                        box-shadow: 0 2px 8px rgba(102,126,234,0.15);
+                        transition: background 0.2s, color 0.2s;
+                    }
+                    .favorites-filter-btn.active {
+                        background: #764ba2;
+                    }
+                    @media (max-width: 768px) {
+                        .favorite-btn {
+                            font-size: 2em;
+                            margin-left: 8px;
+                        }
+                        .favorites-filter-btn {
+                            font-size: 1.1em;
+                            padding: 14px 28px;
+                        }
+                    }
+            
+            return card;
+        }
+        
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Debounced search handler
+        const debouncedSearch = debounce(searchRecipes, 300);
+        
+        // Event listeners
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            debouncedSearch(query);
+        });
+        
+        // Keyboard navigation for autocomplete
+        searchInput.addEventListener('keydown', (e) => {
+            const items = autocompleteDropdown.getElementsByClassName('autocomplete-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentFocus++;
+                addActive(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentFocus--;
+                addActive(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentFocus > -1 && items[currentFocus]) {
+                    items[currentFocus].click();
+                }
+                currentFocus = -1;
+            } else if (e.key === 'Escape') {
+                autocompleteDropdown.classList.remove('show');
+                currentFocus = -1;
+            }
+        });
+        
+        // Add active class to autocomplete items
+        function addActive(items) {
+            if (!items || items.length === 0) return;
+            removeActive(items);
+            
+            if (currentFocus >= items.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = items.length - 1;
+            
+            items[currentFocus].classList.add('active');
+        }
+        
+        // Remove active class from autocomplete items
+        function removeActive(items) {
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('active');
+            }
+        }
+        
+        // Close autocomplete when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target !== searchInput && e.target !== autocompleteDropdown) {
+                autocompleteDropdown.classList.remove('show');
+                currentFocus = -1;
+            }
+        });
+    </script>
 </body>
 </html>
