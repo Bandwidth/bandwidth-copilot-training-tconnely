@@ -635,6 +635,81 @@
             color: #666;
             font-size: 0.9em;
         }
+
+        /* --- Favorites Feature Styles --- */
+        .recipe-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .recipe-card-header h3 {
+            flex: 1;
+            margin-right: 8px;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            flex-shrink: 0;
+            transition: color 0.2s, transform 0.2s;
+            color: rgba(255, 255, 255, 0.8);
+            vertical-align: middle;
+            outline: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .favorite-btn:hover .heart-icon,
+        .favorite-btn:focus .heart-icon {
+            color: white;
+            transform: scale(1.2);
+        }
+
+        .favorite-btn.favorited .heart-icon {
+            color: #ff6b9d;
+        }
+
+        .favorite-btn .heart-icon {
+            display: inline-block;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .favorites-filter-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transition: opacity 0.2s, transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .favorites-filter-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .favorites-filter-btn.active {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        @media (max-width: 768px) {
+            .favorite-btn {
+                font-size: 1.8em;
+            }
+
+            .favorites-filter-btn {
+                font-size: 1.1em;
+                padding: 14px 28px;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -866,7 +941,11 @@
         }
         
         // Load daily recipe when page loads
-        document.addEventListener('DOMContentLoaded', loadDailyRecipe);
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDailyRecipe();
+            addFavoritesFilterButton();
+            updateFavoriteIcons();
+        });
         
         // Debounce helper function to limit API calls
         function debounce(func, delay) {
@@ -970,17 +1049,20 @@
         function createRecipeCard(recipe) {
             const card = document.createElement('div');
             card.className = 'recipe-result-card fade-in';
-            
+
             const cuisineText = recipe.cuisineType || 'N/A';
             const difficultyText = recipe.difficultyLevel || 'N/A';
             const prepTime = recipe.prepTime || 0;
             const cookTime = recipe.cookTime || 0;
             const totalTime = prepTime + cookTime;
-            
+
             card.innerHTML = `
                 <div class="recipe-card-header">
                     <h3>${escapeHtml(recipe.name)}</h3>
-                    <button class="favorite-btn" data-id="${recipe.id}" aria-label="Toggle favorite" title="Toggle favorite">
+                    <button class="favorite-btn" data-id="${recipe.id}"
+                            aria-label="Toggle favorite for ${escapeHtml(recipe.name)}"
+                            aria-pressed="false"
+                            title="Toggle favorite">
                         <span class="heart-icon">♡</span>
                     </button>
                 </div>
@@ -994,179 +1076,134 @@
                     </div>
                 </div>
             `;
-                    // --- Favorites Feature ---
-                    // Favorite recipes management
-                    function getFavorites() {
-                        try {
-                            return JSON.parse(localStorage.getItem('favoriteRecipes') || '[]');
-                        } catch {
-                            return [];
-                        }
-                    }
 
-                    function setFavorites(favorites) {
-                        localStorage.setItem('favoriteRecipes', JSON.stringify(favorites));
-                    }
+            // Reflect current favorite state immediately after creation
+            const btn = card.querySelector('.favorite-btn');
+            if (isFavorite(recipe.id)) {
+                btn.querySelector('.heart-icon').textContent = '❤️';
+                btn.classList.add('favorited');
+                btn.setAttribute('aria-pressed', 'true');
+            }
 
-                    function isFavorite(recipeId) {
-                        return getFavorites().includes(recipeId);
-                    }
-
-                    function toggleFavorite(recipeId) {
-                        let favorites = getFavorites();
-                        if (favorites.includes(recipeId)) {
-                            favorites = favorites.filter(id => id !== recipeId);
-                        } else {
-                            favorites.push(recipeId);
-                        }
-                        setFavorites(favorites);
-                    }
-
-                    // Update heart icon for all recipe cards
-                    function updateFavoriteIcons() {
-                        document.querySelectorAll('.favorite-btn').forEach(btn => {
-                            const recipeId = btn.getAttribute('data-id');
-                            const heart = btn.querySelector('.heart-icon');
-                            if (isFavorite(recipeId)) {
-                                heart.textContent = '❤️';
-                                btn.classList.add('favorited');
-                            } else {
-                                heart.textContent = '♡';
-                                btn.classList.remove('favorited');
-                            }
-                        });
-                    }
-
-                    // Handle favorite button click
-                    document.addEventListener('click', function(e) {
-                        if (e.target.closest('.favorite-btn')) {
-                            const btn = e.target.closest('.favorite-btn');
-                            const recipeId = btn.getAttribute('data-id');
-                            toggleFavorite(recipeId);
-                            updateFavoriteIcons();
-                        }
-                    });
-
-                    // Visual feedback on hover
-                    document.addEventListener('mouseover', function(e) {
-                        if (e.target.closest('.favorite-btn')) {
-                            e.target.closest('.favorite-btn').classList.add('hovered');
-                        }
-                    });
-                    document.addEventListener('mouseout', function(e) {
-                        if (e.target.closest('.favorite-btn')) {
-                            e.target.closest('.favorite-btn').classList.remove('hovered');
-                        }
-                    });
-
-                    // Filter favorites
-                    function filterFavorites() {
-                        const favorites = getFavorites();
-                        const allCards = Array.from(document.querySelectorAll('.recipe-result-card'));
-                        allCards.forEach(card => {
-                            const btn = card.querySelector('.favorite-btn');
-                            if (!btn) return;
-                            const recipeId = btn.getAttribute('data-id');
-                            if (favorites.includes(recipeId)) {
-                                card.style.display = '';
-                            } else {
-                                card.style.display = 'none';
-                            }
-                        });
-                    }
-
-                    // Show all recipes
-                    function showAllRecipes() {
-                        document.querySelectorAll('.recipe-result-card').forEach(card => {
-                            card.style.display = '';
-                        });
-                    }
-
-                    // Add filter button
-                    function addFavoritesFilterButton() {
-                        const searchSection = document.querySelector('.search-section');
-                        if (!searchSection || document.getElementById('favoritesFilterBtn')) return;
-                        const btn = document.createElement('button');
-                        btn.id = 'favoritesFilterBtn';
-                        btn.className = 'favorites-filter-btn';
-                        btn.textContent = 'My Favorites';
-                        btn.style.marginBottom = '20px';
-                        btn.style.background = '#667eea';
-                        btn.style.color = 'white';
-                        btn.style.border = 'none';
-                        btn.style.borderRadius = '8px';
-                        btn.style.padding = '12px 24px';
-                        btn.style.fontSize = '1em';
-                        btn.style.cursor = 'pointer';
-                        btn.style.boxShadow = '0 2px 8px rgba(102,126,234,0.15)';
-                        btn.style.transition = 'background 0.2s, color 0.2s';
-                        btn.addEventListener('click', function() {
-                            if (btn.classList.toggle('active')) {
-                                filterFavorites();
-                                btn.textContent = 'Show All';
-                            } else {
-                                showAllRecipes();
-                                btn.textContent = 'My Favorites';
-                            }
-                        });
-                        searchSection.insertBefore(btn, searchSection.firstChild);
-                    }
-
-                    // Ensure favorites persist across reloads
-                    document.addEventListener('DOMContentLoaded', function() {
-                        addFavoritesFilterButton();
-                        updateFavoriteIcons();
-                    });
-                    /* --- Favorites Feature Styles --- */
-                    .favorite-btn {
-                        background: none;
-                        border: none;
-                        cursor: pointer;
-                        font-size: 1.5em;
-                        margin-left: 12px;
-                        transition: color 0.2s, transform 0.2s;
-                        color: #667eea;
-                        vertical-align: middle;
-                        outline: none;
-                    }
-                    .favorite-btn.favorited .heart-icon {
-                        color: #667eea;
-                        font-size: 1.5em;
-                    }
-                    .favorite-btn .heart-icon {
-                        transition: color 0.2s, transform 0.2s;
-                    }
-                    .favorite-btn.hovered .heart-icon {
-                        color: #764ba2;
-                        transform: scale(1.2);
-                    }
-                    .favorites-filter-btn {
-                        background: #667eea;
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        padding: 12px 24px;
-                        font-size: 1em;
-                        cursor: pointer;
-                        box-shadow: 0 2px 8px rgba(102,126,234,0.15);
-                        transition: background 0.2s, color 0.2s;
-                    }
-                    .favorites-filter-btn.active {
-                        background: #764ba2;
-                    }
-                    @media (max-width: 768px) {
-                        .favorite-btn {
-                            font-size: 2em;
-                            margin-left: 8px;
-                        }
-                        .favorites-filter-btn {
-                            font-size: 1.1em;
-                            padding: 14px 28px;
-                        }
-                    }
-            
             return card;
         }
+
+        // --- Favorites Feature ---
+
+        /**
+         * Retrieve the list of favorited recipe IDs from localStorage.
+         * @returns {number[]} Array of favorited recipe IDs
+         */
+        function getFavorites() {
+            try {
+                return JSON.parse(localStorage.getItem('favoriteRecipes') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        /**
+         * Persist the list of favorited recipe IDs to localStorage.
+         * @param {number[]} favorites - Array of recipe IDs to store
+         */
+        function setFavorites(favorites) {
+            localStorage.setItem('favoriteRecipes', JSON.stringify(favorites));
+        }
+
+        /**
+         * Check whether a recipe is currently favorited.
+         * @param {number|string} recipeId - The recipe ID to check
+         * @returns {boolean}
+         */
+        function isFavorite(recipeId) {
+            return getFavorites().includes(Number(recipeId));
+        }
+
+        /**
+         * Toggle favorite status for a recipe and refresh all heart icons.
+         * @param {number|string} recipeId - The recipe ID to toggle
+         */
+        function toggleFavorite(recipeId) {
+            recipeId = Number(recipeId);
+            let favorites = getFavorites();
+            if (favorites.includes(recipeId)) {
+                favorites = favorites.filter(id => id !== recipeId);
+            } else {
+                favorites.push(recipeId);
+            }
+            setFavorites(favorites);
+            updateFavoriteIcons();
+        }
+
+        /**
+         * Update all heart icons on the page to reflect current favorites.
+         */
+        function updateFavoriteIcons() {
+            const favorites = getFavorites();
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                const recipeId = Number(btn.getAttribute('data-id'));
+                const heart = btn.querySelector('.heart-icon');
+                const fav = favorites.includes(recipeId);
+                heart.textContent = fav ? '❤️' : '♡';
+                btn.classList.toggle('favorited', fav);
+                btn.setAttribute('aria-pressed', String(fav));
+            });
+        }
+
+        /**
+         * Hide cards whose recipe is not in the favorites list.
+         */
+        function filterFavorites() {
+            const favorites = getFavorites();
+            document.querySelectorAll('.recipe-result-card').forEach(card => {
+                const btn = card.querySelector('.favorite-btn');
+                if (!btn) return;
+                card.style.display = favorites.includes(Number(btn.getAttribute('data-id'))) ? '' : 'none';
+            });
+        }
+
+        /**
+         * Show all recipe cards (remove any visibility filtering).
+         */
+        function showAllRecipes() {
+            document.querySelectorAll('.recipe-result-card').forEach(card => {
+                card.style.display = '';
+            });
+        }
+
+        /**
+         * Inject a "My Favorites" toggle button above the search section.
+         * Idempotent – will not add a second button if called multiple times.
+         */
+        function addFavoritesFilterButton() {
+            const searchSection = document.querySelector('.search-section');
+            if (!searchSection || document.getElementById('favoritesFilterBtn')) return;
+
+            const btn = document.createElement('button');
+            btn.id = 'favoritesFilterBtn';
+            btn.className = 'favorites-filter-btn';
+            btn.textContent = '❤️ My Favorites';
+            btn.addEventListener('click', function() {
+                if (btn.classList.toggle('active')) {
+                    filterFavorites();
+                    btn.textContent = '📋 Show All';
+                } else {
+                    showAllRecipes();
+                    btn.textContent = '❤️ My Favorites';
+                }
+            });
+            searchSection.insertBefore(btn, searchSection.firstChild);
+        }
+
+        // Handle favorite button clicks via event delegation
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.favorite-btn');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleFavorite(btn.getAttribute('data-id'));
+            }
+        });
         
         // Escape HTML to prevent XSS
         function escapeHtml(text) {

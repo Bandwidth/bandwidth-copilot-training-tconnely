@@ -111,9 +111,18 @@
             color: white;
             padding: 20px;
         }
-        
-        .recipe-header h3 {
+
+        .recipe-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 5px;
+        }
+
+        .recipe-header-top h3 {
+            margin: 0;
+            flex: 1;
+            margin-right: 8px;
         }
         
         .recipe-cuisine {
@@ -280,7 +289,58 @@
             color: #667eea;
             margin-bottom: 10px;
         }
-        
+
+        /* --- Favorites Feature Styles --- */
+        .favorite-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.4em;
+            flex-shrink: 0;
+            padding: 0;
+            line-height: 1;
+            color: rgba(255, 255, 255, 0.8);
+            transition: transform 0.2s;
+        }
+
+        .favorite-btn:hover .heart-icon,
+        .favorite-btn:focus .heart-icon {
+            color: white;
+            transform: scale(1.2);
+        }
+
+        .favorite-btn.favorited .heart-icon {
+            color: #ff6b9d;
+        }
+
+        .favorite-btn .heart-icon {
+            display: inline-block;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .favorites-filter-btn {
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transition: opacity 0.2s, transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .favorites-filter-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .favorites-filter-btn.active {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
         @media (max-width: 768px) {
             .filters {
                 flex-direction: column;
@@ -301,6 +361,16 @@
             
             .star-input .star {
                 font-size: 1.5em;
+            }
+
+            .favorite-btn {
+                font-size: 1.8em;
+            }
+
+            .favorites-filter-btn {
+                font-size: 1.1em;
+                padding: 14px 28px;
+                width: 100%;
             }
         }
     </style>
@@ -353,9 +423,8 @@
     </div>
     
     <script>
-<<<<<<< HEAD
         let allRecipes = [];
-        
+
         // Fetch recipes from API on page load
         async function loadRecipes() {
             try {
@@ -370,11 +439,11 @@
                 showError('Unable to load recipes. Please try again later.');
             }
         }
-        
+
         // Display recipes in the grid
         function displayRecipes(recipes) {
             const grid = document.getElementById('recipesGrid');
-            
+
             if (recipes.length === 0) {
                 grid.innerHTML = `
                     <div class="no-recipes">
@@ -384,35 +453,53 @@
                 `;
                 return;
             }
-            
+
             grid.innerHTML = recipes.map(recipe => createRecipeCard(recipe)).join('');
+            updateFavoriteIcons();
         }
-        
-        // Create a recipe card HTML
+
+        /**
+         * Create a recipe card HTML string.
+         * @param {Object} recipe - The recipe object
+         * @returns {string} HTML string for the recipe card
+         */
         function createRecipeCard(recipe) {
             const stars = generateStars(recipe.averageRating || 0);
-            const ratingText = recipe.ratingCount > 0 
-                ? `${recipe.averageRating.toFixed(1)} stars (${recipe.ratingCount} rating${recipe.ratingCount !== 1 ? 's' : ''})`
+            const ratingCount = recipe.ratingCount || 0;
+            const avgRating = recipe.averageRating || 0;
+            const ratingText = ratingCount > 0
+                ? `${avgRating.toFixed(1)} stars (${ratingCount} rating${ratingCount !== 1 ? 's' : ''})`
                 : 'No ratings yet';
-            
+            const isFav = isFavorite(recipe.id);
+
             return `
                 <div class="recipe-card" data-recipe-id="${recipe.id}">
                     <div class="recipe-header">
-                        <h3>${recipe.name}</h3>
-                        <span class="recipe-cuisine">${recipe.cuisineType || 'Unknown'}</span>
+                        <div class="recipe-header-top">
+                            <h3>${escapeHtml(recipe.name)}</h3>
+                            <button class="favorite-btn"
+                                    data-id="${recipe.id}"
+                                    onclick="toggleFavorite(${recipe.id})"
+                                    aria-label="Toggle favorite for ${escapeHtml(recipe.name)}"
+                                    aria-pressed="${isFav}"
+                                    title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+                                <span class="heart-icon">${isFav ? '❤️' : '♡'}</span>
+                            </button>
+                        </div>
+                        <span class="recipe-cuisine">${escapeHtml(recipe.cuisineType || 'Unknown')}</span>
                     </div>
                     <div class="recipe-body">
                         <div class="rating-display">
                             <span class="stars">${stars}</span>
-                            <span class="rating-text">${ratingText}</span>
+                            <span class="rating-text">${escapeHtml(ratingText)}</span>
                         </div>
                         <div class="recipe-meta">
-                            <span>⏱️ ${recipe.prepTime + recipe.cookTime} min</span>
-                            <span class="difficulty ${recipe.difficultyLevel.toLowerCase()}">${recipe.difficultyLevel}</span>
+                            <span>⏱️ ${(recipe.prepTime || 0) + (recipe.cookTime || 0)} min</span>
+                            <span class="difficulty ${escapeHtml((recipe.difficultyLevel || 'Medium').toLowerCase())}">${escapeHtml(recipe.difficultyLevel || 'Medium')}</span>
                         </div>
-                        <p class="recipe-description">${recipe.description || 'No description available'}</p>
+                        <p class="recipe-description">${escapeHtml(recipe.description || 'No description available')}</p>
                         <div class="recipe-footer">
-                            <span class="servings">🍽️ ${recipe.servings} servings</span>
+                            <span class="servings">🍽️ ${recipe.servings || 0} servings</span>
                         </div>
                         <button class="rate-button" onclick="showRatingWidget(${recipe.id})">Rate this recipe</button>
                         <div class="rating-widget" id="rating-widget-${recipe.id}">
@@ -432,252 +519,220 @@
                 </div>
             `;
         }
-        
+
         // Generate star display for a rating
         function generateStars(rating) {
             const fullStars = Math.floor(rating);
-            const stars = '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
-            return stars;
+            return '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
         }
-        
+
         // Show rating widget for a recipe
         function showRatingWidget(recipeId) {
-            const widget = document.getElementById(`rating-widget-${recipeId}`);
-            widget.classList.add('active');
+            document.getElementById(`rating-widget-${recipeId}`).classList.add('active');
         }
-        
+
         // Hide rating widget
         function hideRatingWidget(recipeId) {
-            const widget = document.getElementById(`rating-widget-${recipeId}`);
-            widget.classList.remove('active');
+            document.getElementById(`rating-widget-${recipeId}`).classList.remove('active');
             resetStars(recipeId);
         }
-        
+
         // Highlight stars on hover
         function highlightStars(recipeId, rating) {
-            const stars = document.querySelectorAll(`#star-input-${recipeId} .star`);
-            stars.forEach((star, index) => {
-                if (index < rating) {
-                    star.classList.add('filled');
-                } else {
-                    star.classList.remove('filled');
-                }
+            document.querySelectorAll(`#star-input-${recipeId} .star`).forEach((star, index) => {
+                star.classList.toggle('filled', index < rating);
             });
         }
-        
+
         // Reset star highlighting
         function resetStars(recipeId) {
-            const stars = document.querySelectorAll(`#star-input-${recipeId} .star`);
-            stars.forEach(star => star.classList.remove('filled'));
+            document.querySelectorAll(`#star-input-${recipeId} .star`).forEach(star => star.classList.remove('filled'));
         }
-        
+
         // Submit rating for a recipe
         async function selectRating(recipeId, rating) {
             try {
                 const response = await fetch(`/api/recipes/${recipeId}/rate`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ rating: rating })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('Failed to submit rating');
                 }
-                
+
                 const updatedRecipe = await response.json();
-                
-                // Update the recipe in the local array
                 const index = allRecipes.findIndex(r => r.id === recipeId);
                 if (index !== -1) {
                     allRecipes[index] = updatedRecipe;
                 }
-                
-                // Re-display recipes with updated rating
+
                 applyFilters();
-                
-                // Hide the rating widget
                 hideRatingWidget(recipeId);
-                
-                // Show success message
                 showSuccess('Rating submitted successfully!');
             } catch (error) {
                 console.error('Error submitting rating:', error);
                 showError('Failed to submit rating. Please try again.');
             }
         }
-        
+
+        // --- Favorites Feature ---
+
+        /**
+         * Retrieve the list of favorited recipe IDs from localStorage.
+         * @returns {number[]} Array of favorited recipe IDs
+         */
+        function getFavorites() {
+            try {
+                return JSON.parse(localStorage.getItem('favoriteRecipes') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        /**
+         * Persist the list of favorited recipe IDs to localStorage.
+         * @param {number[]} favorites - Array of recipe IDs to store
+         */
+        function setFavorites(favorites) {
+            localStorage.setItem('favoriteRecipes', JSON.stringify(favorites));
+        }
+
+        /**
+         * Check whether a recipe is currently favorited.
+         * @param {number|string} recipeId - The recipe ID to check
+         * @returns {boolean}
+         */
+        function isFavorite(recipeId) {
+            return getFavorites().includes(Number(recipeId));
+        }
+
+        /**
+         * Toggle favorite status for a recipe and refresh all heart icons.
+         * @param {number|string} recipeId - The recipe ID to toggle
+         */
+        function toggleFavorite(recipeId) {
+            recipeId = Number(recipeId);
+            let favorites = getFavorites();
+            if (favorites.includes(recipeId)) {
+                favorites = favorites.filter(id => id !== recipeId);
+            } else {
+                favorites.push(recipeId);
+            }
+            setFavorites(favorites);
+            updateFavoriteIcons();
+        }
+
+        /**
+         * Update all heart icons on the page to reflect current favorites.
+         */
+        function updateFavoriteIcons() {
+            const favorites = getFavorites();
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                const recipeId = Number(btn.getAttribute('data-id'));
+                const heart = btn.querySelector('.heart-icon');
+                const fav = favorites.includes(recipeId);
+                heart.textContent = fav ? '❤️' : '♡';
+                btn.classList.toggle('favorited', fav);
+                btn.setAttribute('aria-pressed', String(fav));
+                btn.title = fav ? 'Remove from favorites' : 'Add to favorites';
+            });
+        }
+
+        /**
+         * Filter the displayed cards to show only favorited recipes.
+         */
+        function filterFavorites() {
+            const favorites = getFavorites();
+            document.querySelectorAll('.recipe-card').forEach(card => {
+                const btn = card.querySelector('.favorite-btn');
+                if (!btn) return;
+                card.style.display = favorites.includes(Number(btn.getAttribute('data-id'))) ? '' : 'none';
+            });
+        }
+
+        /**
+         * Show all recipe cards (remove any visibility filtering).
+         */
+        function showAllRecipes() {
+            document.querySelectorAll('.recipe-card').forEach(card => {
+                card.style.display = '';
+            });
+        }
+
+        /**
+         * Inject a "My Favorites" toggle button above the filters.
+         * Idempotent – will not add a second button if called multiple times.
+         */
+        function addFavoritesFilterButton() {
+            const content = document.querySelector('.content');
+            if (!content || document.getElementById('favoritesFilterBtn')) return;
+
+            const btn = document.createElement('button');
+            btn.id = 'favoritesFilterBtn';
+            btn.className = 'favorites-filter-btn';
+            btn.textContent = '❤️ My Favorites';
+            btn.addEventListener('click', function() {
+                if (btn.classList.toggle('active')) {
+                    filterFavorites();
+                    btn.textContent = '📋 Show All';
+                } else {
+                    showAllRecipes();
+                    btn.textContent = '❤️ My Favorites';
+                }
+            });
+            content.insertBefore(btn, content.firstChild);
+        }
+
         // Filter recipes based on selected filters
         function applyFilters() {
             const difficulty = document.getElementById('difficulty').value;
             const cuisine = document.getElementById('cuisine').value;
             const search = document.getElementById('search').value.toLowerCase();
-            
-            let filtered = allRecipes;
-            
-            if (difficulty) {
-                filtered = filtered.filter(r => r.difficultyLevel === difficulty);
-            }
-            
-            if (cuisine) {
-                filtered = filtered.filter(r => r.cuisineType === cuisine);
-            }
-            
-            if (search) {
-                filtered = filtered.filter(r => 
-                    r.name.toLowerCase().includes(search) || 
-                    (r.description && r.description.toLowerCase().includes(search))
-                );
-            }
-=======
-        // DOM Elements
-        const recipesGrid = document.getElementById('recipesGrid');
-        const difficultySelect = document.getElementById('difficulty');
-        const cuisineSelect = document.getElementById('cuisine');
-        const searchInput = document.getElementById('search');
-        
-        let allRecipes = [];
-        
-        /**
-         * Fetch all recipes from the API on page load
-         */
-        async function loadRecipes() {
-            try {
-                const response = await fetch('/api/recipes');
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch recipes');
-                }
-                
-                allRecipes = await response.json();
-                displayRecipes(allRecipes);
-                
-            } catch (error) {
-                console.error('Error loading recipes:', error);
-                recipesGrid.innerHTML = '<div class="no-recipes"><h2>Error loading recipes</h2><p>Please refresh the page and try again.</p></div>';
-            }
-        }
-        
-        /**
-         * Display recipes in the grid based on current filters
-         * @param {Array} recipes - The recipes to display
-         */
-        function displayRecipes(recipes) {
-            if (recipes.length === 0) {
-                recipesGrid.innerHTML = '<div class="no-recipes"><h2>No Recipes Found</h2><p>Try adjusting your filters or check back later!</p></div>';
-                return;
-            }
-            
-            recipesGrid.innerHTML = '';
-            recipes.forEach(recipe => {
-                const card = createRecipeCard(recipe);
-                recipesGrid.appendChild(card);
-            });
-        }
-        
-        /**
-         * Create a recipe card element
-         * @param {Object} recipe - The recipe object
-         * @returns {HTMLElement} The recipe card element
-         */
-        function createRecipeCard(recipe) {
-            const card = document.createElement('div');
-            card.className = 'recipe-card';
-            
-            const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
-            const difficultyClass = (recipe.difficultyLevel || 'Medium').toLowerCase();
-            
-            card.innerHTML = `
-                <div class="recipe-header">
-                    <h3>${escapeHtml(recipe.name)}</h3>
-                    <span class="recipe-cuisine">${escapeHtml(recipe.cuisineType || 'International')}</span>
-                </div>
-                <div class="recipe-body">
-                    <p class="recipe-description">${escapeHtml(recipe.description || 'A delicious recipe for you to try!')}</p>
-                    <div class="recipe-meta">
-                        <span>👥 ${recipe.servings || 0} servings</span>
-                        <span>⏱️ ${totalTime} min</span>
-                    </div>
-                    <span class="difficulty ${difficultyClass}">${escapeHtml(recipe.difficultyLevel || 'Medium')}</span>
-                </div>
-                <div class="recipe-footer">
-                    <span class="servings">${recipe.servings || 0} servings</span>
-                    <a href="#" class="view-recipe" onclick="viewRecipe(${recipe.id}); return false;">View Recipe</a>
-                </div>
-            `;
-            
-            return card;
-        }
-        
-        /**
-         * Apply filters and display matching recipes
-         */
-        function applyFilters() {
-            const difficulty = difficultySelect.value;
-            const cuisine = cuisineSelect.value;
-            const searchTerm = searchInput.value.toLowerCase();
-            
+
             const filtered = allRecipes.filter(recipe => {
                 const matchesDifficulty = !difficulty || recipe.difficultyLevel === difficulty;
                 const matchesCuisine = !cuisine || recipe.cuisineType === cuisine;
-                const matchesSearch = !searchTerm || recipe.name.toLowerCase().includes(searchTerm);
-                
+                const matchesSearch = !search ||
+                    recipe.name.toLowerCase().includes(search) ||
+                    (recipe.description && recipe.description.toLowerCase().includes(search));
                 return matchesDifficulty && matchesCuisine && matchesSearch;
             });
->>>>>>> 9d33da487fa9ac1967e107b83af2f923f7955211
-            
+
             displayRecipes(filtered);
         }
-        
-<<<<<<< HEAD
+
         // Show error message
         function showError(message) {
             alert(message);
         }
-        
+
         // Show success message
         function showSuccess(message) {
             alert(message);
         }
-        
-        // Add event listeners for filters
-        document.addEventListener('DOMContentLoaded', function() {
-            loadRecipes();
-            
-            document.getElementById('difficulty').addEventListener('change', applyFilters);
-            document.getElementById('cuisine').addEventListener('change', applyFilters);
-            document.getElementById('search').addEventListener('input', applyFilters);
-        });
-=======
+
         /**
-         * Escape HTML to prevent XSS attacks
-         * @param {String} text - The text to escape
-         * @returns {String} The escaped text
+         * Escape HTML to prevent XSS attacks.
+         * @param {string} text - The text to escape
+         * @returns {string} The escaped text
          */
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-        
-        /**
-         * View recipe details (placeholder for future implementation)
-         * @param {Number} recipeId - The recipe ID
-         */
-        function viewRecipe(recipeId) {
-            console.log('View recipe:', recipeId);
-            // TODO: Implement modal or detail view for recipe
-        }
-        
-        // Event listeners for filters
-        difficultySelect.addEventListener('change', applyFilters);
-        cuisineSelect.addEventListener('change', applyFilters);
-        searchInput.addEventListener('input', applyFilters);
-        
-        // Load recipes when page loads
-        document.addEventListener('DOMContentLoaded', loadRecipes);
->>>>>>> 9d33da487fa9ac1967e107b83af2f923f7955211
+
+        // Add event listeners for filters
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecipes();
+            addFavoritesFilterButton();
+
+            document.getElementById('difficulty').addEventListener('change', applyFilters);
+            document.getElementById('cuisine').addEventListener('change', applyFilters);
+            document.getElementById('search').addEventListener('input', applyFilters);
+        });
     </script>
 </body>
 </html>

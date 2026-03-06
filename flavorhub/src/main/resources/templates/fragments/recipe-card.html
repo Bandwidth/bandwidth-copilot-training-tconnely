@@ -28,6 +28,15 @@
               role="status"
               aria-label="Difficulty level: " th:aria-label="'Difficulty level: ' + ${recipe.difficultyLevel}">
         </span>
+        <!-- Favorite Button -->
+        <button class="recipe-card-favorite-btn"
+                th:data-id="${recipe.id}"
+                th:aria-label="'Toggle favorite for ' + ${recipe.name}"
+                aria-pressed="false"
+                title="Add to favorites"
+                onclick="toggleCardFavorite(this)">
+            <span class="heart-icon">♡</span>
+        </button>
     </div>
     
     <!-- Recipe Body -->
@@ -163,6 +172,49 @@
         letter-spacing: 0.5px;
         backdrop-filter: blur(8px);
         animation: slideIn 0.3s ease forwards;
+    }
+
+    /* Favorite Button */
+    .recipe-card-favorite-btn {
+        position: absolute;
+        top: 10px;
+        left: 11px;
+        background: rgba(0, 0, 0, 0.25);
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        color: white;
+        backdrop-filter: blur(4px);
+        transition: background 0.2s, transform 0.2s;
+        z-index: 1;
+    }
+
+    .recipe-card-favorite-btn:hover,
+    .recipe-card-favorite-btn:focus {
+        background: rgba(0, 0, 0, 0.45);
+        transform: scale(1.1);
+        outline: 2px solid white;
+        outline-offset: 2px;
+    }
+
+    .recipe-card-favorite-btn.favorited {
+        background: rgba(255, 107, 157, 0.3);
+    }
+
+    .recipe-card-favorite-btn .heart-icon {
+        display: inline-block;
+        transition: color 0.2s, transform 0.2s;
+    }
+
+    .recipe-card-favorite-btn.favorited .heart-icon {
+        color: #ff6b9d;
     }
     
     .difficulty-easy {
@@ -385,9 +437,77 @@
             font-size: 11px;
             padding: 3px 8px;
         }
+
+        .recipe-card-favorite-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+        }
     }
     
 </style>
+
+<script>
+    /**
+     * Retrieve the list of favorited recipe IDs from localStorage.
+     * Uses a namespaced key shared across the application.
+     * @returns {number[]}
+     */
+    function getCardFavorites() {
+        try {
+            return JSON.parse(localStorage.getItem('favoriteRecipes') || '[]');
+        } catch {
+            return [];
+        }
+    }
+
+    /**
+     * Persist the list of favorited recipe IDs to localStorage.
+     * @param {number[]} favorites
+     */
+    function setCardFavorites(favorites) {
+        localStorage.setItem('favoriteRecipes', JSON.stringify(favorites));
+    }
+
+    /**
+     * Toggle favorite status when a recipe-card favorite button is clicked.
+     * Updates the button's visual state immediately.
+     * @param {HTMLButtonElement} btn - The clicked favorite button
+     */
+    function toggleCardFavorite(btn) {
+        const recipeId = Number(btn.getAttribute('data-id'));
+        let favorites = getCardFavorites();
+        const isFav = favorites.includes(recipeId);
+
+        if (isFav) {
+            favorites = favorites.filter(id => id !== recipeId);
+        } else {
+            favorites.push(recipeId);
+        }
+        setCardFavorites(favorites);
+
+        const heart = btn.querySelector('.heart-icon');
+        const nowFav = !isFav;
+        heart.textContent = nowFav ? '❤️' : '♡';
+        btn.classList.toggle('favorited', nowFav);
+        btn.setAttribute('aria-pressed', String(nowFav));
+        btn.title = nowFav ? 'Remove from favorites' : 'Add to favorites';
+    }
+
+    // Initialise heart icons for any recipe-card fragments on the page
+    document.addEventListener('DOMContentLoaded', function() {
+        const favorites = getCardFavorites();
+        document.querySelectorAll('.recipe-card-favorite-btn').forEach(function(btn) {
+            const recipeId = Number(btn.getAttribute('data-id'));
+            if (favorites.includes(recipeId)) {
+                btn.querySelector('.heart-icon').textContent = '❤️';
+                btn.classList.add('favorited');
+                btn.setAttribute('aria-pressed', 'true');
+                btn.title = 'Remove from favorites';
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
